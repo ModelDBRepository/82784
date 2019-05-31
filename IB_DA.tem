@@ -1,0 +1,95 @@
+/* Simulation code from Durstewitz & Gabriel (2006), "Dynamical basis of */
+/* irregular spiking in NMDA-driven prefrontal cortex neurons", Cerebral */
+/* Cortex                                                                */
+
+
+begintemplate IBcell
+
+public soma, dend
+
+create soma, dend
+
+proc init() {
+     
+     connect soma(1), dend(0)
+
+     soma {
+	nseg = 1
+	L = 28.618
+	diam = 21.840
+
+	insert Naf
+	gNafbar_Naf = 117e-3
+
+	insert NapDA
+	gNapbar_NapDA = 1.8e-3
+
+	insert Kdr
+	gKdrbar_Kdr = 50e-3
+
+	insert HVA
+	gHVAbar_HVA = 0.4e-3
+
+	insert Kc
+	gKcbar_Kc = 2.1e-3
+
+	insert Ks
+	gKsbar_Ks = 0.4*0.08e-3
+
+	insert cadyn
+	CAF_cadyn = 600e-9
+	tc_cadyn = 250
+	}
+
+     dend {
+	nseg = 1
+	L = 650
+        diam = 6.5
+
+	insert Naf
+	gNafbar_Naf = 20e-3
+
+	insert NapDA
+	gNapbar_NapDA = 0.8e-3
+
+	insert Kdr
+	gKdrbar_Kdr = 14e-3
+
+	insert HVA
+	gHVAbar_HVA = 0.85*0.8e-3
+
+	insert Kc
+	gKcbar_Kc = 2.1e-3
+
+	insert Ks
+	gKsbar_Ks = 0.4*0.08e-3
+
+	insert nmdac
+	gNMDAcbar_nmdac = 0.0e-3
+
+	insert cadyn
+	CAF_cadyn = 600e-9
+	tc_cadyn = 120
+	}
+
+     forall {
+	insert kdyn
+	insert pas
+      	cm = 1.2     /* microF/cm2 */
+	g_pas = 1/30000  /* mho/cm2 */
+        e_pas = -70
+	Ra = 150        /* ohm-cm */
+	}
+
+     dend {
+        cm=cm*1.92
+        g_pas=g_pas*1.92
+	}
+
+     cao0_ca_ion = 2  /* mM */
+     cai0_ca_ion = 50e-6   /* mM */
+     ko0_k_ion = 3.82  /* mM */
+     ki0_k_ion = 140   /* mM */
+}
+
+endtemplate IBcell

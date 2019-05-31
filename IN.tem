@@ -1,0 +1,40 @@
+/* Simulation code from Durstewitz & Gabriel (2006), "Dynamical basis of */
+/* irregular spiking in NMDA-driven prefrontal cortex neurons", Cerebral */
+/* Cortex                                                                */
+
+
+begintemplate INcell
+
+public soma
+
+create soma
+
+proc init(){
+
+     soma {
+	nseg=1
+	L=42
+	diam=42  
+
+	insert NafIN
+	gNafbar_NafIN = 45e-3
+
+	insert KdrIN
+	gKdrbar_KdrIN = 18e-3
+
+	insert nmdac
+	gNMDAcbar_nmdac = 0.0e-3
+
+	insert kdyn
+        insert pas
+      	cm = 1.2       /* microF/cm2 */
+	g_pas = 1/30000  /* mho/cm2 */
+        e_pas = -70
+	Ra = 150         /* ohm-cm */
+	}
+
+     ko0_k_ion = 3.82  /* mM */
+     ki0_k_ion = 140   /* mM */
+}
+
+endtemplate INcell

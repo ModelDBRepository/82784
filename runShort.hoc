@@ -1,0 +1,54 @@
+// *********************************************************************
+// Simulation code from Durstewitz & Gabriel (2006), "Dynamical basis of 
+// irregular spiking in NMDA-driven prefrontal cortex neurons", Cerebral
+// Cortex
+// *********************************************************************
+//
+// start-up file
+
+
+gexc=0.2
+ginh=0.06
+Npc=100
+Nin=25
+AvgNMDA=0.095e-3
+xopen("smallRun.hoc")
+write_to_file(0)
+StoreNetPar(0)
+// below in case modelview or other nrngui that
+// might require an accessed section is desired
+access IBcell[0].dend
+
+objref vbox
+vbox = new VBox()
+vbox.intercept(1)
+// graph a few inhibitory cells
+xopen("vec_disp.ses")
+clipboard_retrieve("out/IN0_0.dat")
+Graph[0].exec_menu("Copy From Clipboard")
+
+clipboard_retrieve("out/IN0_5.dat")
+Graph[0].exec_menu("Copy From Clipboard")
+
+clipboard_retrieve("out/IN0_10.dat")
+Graph[0].exec_menu("Copy From Clipboard")
+
+Graph[0].label(0.299681, 0.978697, "3/25 example inhibitory cells", 2, 1, 0, 1, 1)
+Graph[0].exec_menu("View = plot")
+
+xopen("vec_disp.ses")
+
+clipboard_retrieve("out/PC0_0.dat")
+Graph[1].exec_menu("Copy From Clipboard")
+
+clipboard_retrieve("out/PC0_1.dat")
+Graph[1].exec_menu("Copy From Clipboard")
+
+clipboard_retrieve("out/PC0_2.dat")
+Graph[1].exec_menu("Copy From Clipboard")
+
+Graph[1].label(0.299681, 0.978697, "3/100 example pyramidal cells", 2, 1, 0, 1, 1)
+Graph[1].exec_menu("View = plot")
+
+vbox.intercept(0)
+vbox.map()

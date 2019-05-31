@@ -1,0 +1,105 @@
+// *********************************************************************
+// Simulation code from Durstewitz & Gabriel (2006), "Dynamical basis of 
+// irregular spiking in NMDA-driven prefrontal cortex neurons", Cerebral
+// Cortex
+// *********************************************************************
+//
+// (c) 2006 Daniel Durstewitz
+//
+// Code for single cell simulations
+
+xopen("IB_DA.tem")
+objref ibn
+ibn=new IBcell()
+
+ropen("SglCellPar.par")
+vstart=fscan()
+tend=fscan()
+ibn.soma.L=fscan()
+ibn.soma.diam=fscan()
+ibn.soma.gNapbar_NapDA=fscan()
+ibn.soma.gKsbar_Ks=fscan()
+ibn.soma.gHVAbar_HVA=fscan()
+ibn.soma.gKcbar_Kc=fscan()
+ibn.dend.L=fscan()
+ibn.dend.diam=fscan()
+ibn.dend.gNMDAcbar_nmdac=fscan()
+ibn.dend.gNapbar_NapDA=fscan()
+ibn.dend.gKsbar_Ks=fscan()
+ibn.dend.gHVAbar_HVA=fscan()
+ibn.dend.gKcbar_Kc=fscan()
+
+objref stim
+ibn.soma stim=new IClamp(.5)
+stim.del=0
+stim.dur=1e9
+stim.amp=fscan()
+ropen()
+
+load_file("stdrun.hoc")
+objref cv
+cv=new CVode(1)
+cv.rtol(1e-8)
+cv.atol(1e-10)
+cv.active(1)
+cv.use_local_dt(1)
+finitialize(vstart)
+fcurrent()
+cv.re_init()
+
+t=0
+tstop=tend
+dt=0.05
+
+thPC=-20
+objref ST
+objref STdet
+ST=new Vector()
+ibn.soma STdet=new APCount(.5)
+STdet.thresh=thPC
+STdet.record(ST)
+
+n=int(tstop/dt)
+objref PCv
+objref PCt
+PCv=new Vector(n)
+PCt=new Vector(n)
+for j=0,n-1 { PCt.x[j]=j*dt }
+ibn.soma cv.record(&v(.5),PCv,PCt,1)
+objref PCv2
+objref PCt2
+PCv2=new Vector(n)
+PCt2=new Vector(n)
+for j=0,n-1 { PCt2.x[j]=j*dt }
+ibn.dend cv.record(&v(.5),PCv2,PCt2,1)
+
+run()
+
+objref fpV
+fpV=new File()
+func write_to_fileV() {
+     strdef fn
+     sprint(fn,"out/PCsgl%d.dat",$1)
+     fpV.wopen(fn)
+     for j=0,PCt.size()-1 {
+	      fpV.printf("%f %f %f\n",PCt.x[j],PCv.x[j],PCv2.x[j])
+	          }
+     fpV.close()
+     return i
+}
+
+objref fpST
+fpST=new File()
+func write_to_fileST() {
+     strdef fn
+     sprint(fn,"out/PCsgl%d.st",$1)
+     fpST.wopen(fn)
+     for j=0,ST.size()-1 {
+	      fpST.printf("%f\n",ST.x[j])	
+	          }
+     fpST.close()
+     return i
+}
+
+write_to_fileV(0)
+write_to_fileST(0)

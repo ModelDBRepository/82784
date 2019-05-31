@@ -1,0 +1,16 @@
+// *********************************************************************
+// Simulation code from Durstewitz & Gabriel (2006), "Dynamical basis of 
+// irregular spiking in NMDA-driven prefrontal cortex neurons", Cerebral
+// Cortex
+// *********************************************************************
+//
+// start-up file
+
+gexc=0.2
+ginh=0.06
+Npc=100
+Nin=25
+AvgNMDA=0.095e-3
+xopen("runCNetZ_DA.hoc")
+write_to_file(0)
+StoreNetPar(0)

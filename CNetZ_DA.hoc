@@ -1,0 +1,247 @@
+// *********************************************************************
+// Simulation code from Durstewitz & Gabriel (2006), "Dynamical basis of 
+// irregular spiking in NMDA-driven prefrontal cortex neurons", Cerebral
+// Cortex
+// *********************************************************************
+//
+// (c) 2006 Daniel Durstewitz
+
+objref IBnet[Npc*Ncol]
+objref INnet[Nin*Ncol]
+
+objref randn
+randn=new Random(1)
+
+for i=0,Npc*Ncol-1 {
+    IBnet[i]=new IBcell()
+    IBnet[i].dend.gNMDAcbar_nmdac=randn.normal(gNMDAc_avgPC,gNMDAc_stdPC^2)
+    if (IBnet[i].dend.gNMDAcbar_nmdac<0) IBnet[i].dend.gNMDAcbar_nmdac=0
+
+    y=IBnet[i].soma.gHVAbar_HVA
+    IBnet[i].soma.gHVAbar_HVA=randn.normal(y,(y*gHVAstd)^2)
+    if (IBnet[i].soma.gHVAbar_HVA<0) IBnet[i].soma.gHVAbar_HVA=0
+    y=IBnet[i].soma.gKcbar_Kc
+    IBnet[i].soma.gKcbar_Kc=randn.normal(y,(y*gCstd)^2)
+    if (IBnet[i].soma.gKcbar_Kc<0) IBnet[i].soma.gKcbar_Kc=0
+    y=IBnet[i].soma.gKsbar_Ks
+    IBnet[i].soma.gKsbar_Ks=randn.normal(y,(y*gKsstd)^2)
+    if (IBnet[i].soma.gKsbar_Ks<0) IBnet[i].soma.gKsbar_Ks=0
+    y=IBnet[i].soma.gNapbar_NapDA
+    IBnet[i].soma.gNapbar_NapDA=randn.normal(y,(y*gNapstd)^2)
+    if (IBnet[i].soma.gNapbar_NapDA<0) IBnet[i].soma.gNapbar_NapDA=0
+
+    y=IBnet[i].dend.gHVAbar_HVA
+    IBnet[i].dend.gHVAbar_HVA=randn.normal(y,(y*gHVAstd)^2)
+    if (IBnet[i].dend.gHVAbar_HVA<0) IBnet[i].dend.gHVAbar_HVA=0
+    y=IBnet[i].dend.gKcbar_Kc
+    IBnet[i].dend.gKcbar_Kc=randn.normal(y,(y*gCstd)^2)
+    if (IBnet[i].dend.gKcbar_Kc<0) IBnet[i].dend.gKcbar_Kc=0
+    y=IBnet[i].dend.gKsbar_Ks
+    IBnet[i].dend.gKsbar_Ks=randn.normal(y,(y*gKsstd)^2)
+    if (IBnet[i].dend.gKsbar_Ks<0) IBnet[i].dend.gKsbar_Ks=0
+    y=IBnet[i].dend.gNapbar_NapDA
+    IBnet[i].dend.gNapbar_NapDA=randn.normal(y,(y*gNapstd)^2)
+    if (IBnet[i].dend.gNapbar_NapDA<0) IBnet[i].dend.gNapbar_NapDA=0
+
+    SFmorph=randn.normal(1.0,MorphStd^2)
+    if (SFmorph<0.5) SFmorph=0.5
+    if (SFmorph>2.0) SFmorph=2.0
+    IBnet[i].soma.diam=SFmorph*IBnet[i].soma.diam
+    IBnet[i].soma.L=SFmorph*IBnet[i].soma.L
+    IBnet[i].dend.diam=SFmorph*IBnet[i].dend.diam
+    IBnet[i].dend.L=SFmorph*IBnet[i].dend.L
+}
+
+for i=0,Nin*Ncol-1 {
+    INnet[i]=new INcell()
+    INnet[i].soma.gNMDAcbar_nmdac=randn.normal(gNMDAc_avgIN,gNMDAc_stdIN^2)
+    if (INnet[i].soma.gNMDAcbar_nmdac<0) INnet[i].soma.gNMDAcbar_nmdac=0 
+
+    SFmorph=randn.normal(1.0,MorphStd^2)
+    if (SFmorph<0.5) SFmorph=0.5
+    if (SFmorph>2.0) SFmorph=2.0
+    INnet[i].soma.diam=SFmorph*INnet[i].soma.diam
+    INnet[i].soma.L=SFmorph*INnet[i].soma.L
+}
+
+
+objref IBasyn[Npc*Ncol]
+objref IBnsyn[Npc*Ncol]
+objref IBg0syn[Npc*Ncol]
+objref IBg1syn[Npc*Ncol]
+
+objref INasyn[Nin*Ncol]
+objref INnsyn[Nin*Ncol]
+objref INgsyn[Nin*Ncol]
+
+for i=0,Npc*Ncol-1 {
+    IBnet[i].dend IBasyn[i]=new ampa(.5)
+    IBnet[i].dend IBnsyn[i]=new nmda(.5)
+    IBnet[i].dend IBg1syn[i]=new gaba(.5)
+    IBnet[i].soma IBg0syn[i]=new gaba(.5)
+
+    IBasyn[i].gAMPAmax=gAMPAmaxPC
+    IBnsyn[i].gNMDAmax=gNMDAmaxPC
+    IBg0syn[i].gGABAmax=gGABAmaxPC
+    IBg1syn[i].gGABAmax=gGABAmaxPC
+
+    IBasyn[i].tauD=PCPCtauD
+    IBasyn[i].tauF=PCPCtauF
+    IBasyn[i].util=PCPCutil
+
+    IBnsyn[i].tauD=PCPCtauD
+    IBnsyn[i].tauF=PCPCtauF
+    IBnsyn[i].util=PCPCutil
+
+    IBg0syn[i].tauD=INPCtauD
+    IBg0syn[i].tauF=INPCtauF
+    IBg0syn[i].util=INPCutil
+
+    IBg1syn[i].tauD=INPCtauD
+    IBg1syn[i].tauF=INPCtauF
+    IBg1syn[i].util=INPCutil
+}
+
+for i=0,Nin*Ncol-1 {
+    INnet[i].soma INasyn[i]=new ampa(.5)
+    INnet[i].soma INnsyn[i]=new nmda(.5)
+    INnet[i].soma INgsyn[i]=new gaba(.5)
+
+    INasyn[i].gAMPAmax=gAMPAmaxIN
+    INnsyn[i].gNMDAmax=gNMDAmaxIN
+    INgsyn[i].gGABAmax=gGABAmaxIN
+
+    INasyn[i].tauD=PCINtauD
+    INasyn[i].tauF=PCINtauF
+    INasyn[i].util=PCINutil
+
+    INnsyn[i].tauD=PCINtauD
+    INnsyn[i].tauF=PCINtauF
+    INnsyn[i].util=PCINutil
+
+    INgsyn[i].tauD=ININtauD
+    INgsyn[i].tauF=ININtauF
+    INgsyn[i].util=ININutil
+}
+
+
+// PC->PC connections
+
+objref PCPCconA[Npc*Ncol][Npc*Ncol]
+objref PCPCconN[Npc*Ncol][Npc*Ncol]
+objref ConPCPC
+ConPCPC = new Matrix(Npc*Ncol,Npc*Ncol)
+for i=0,Npc*Ncol-1 {
+    for j=0,Npc*Ncol-1 {
+	q=randn.uniform(0,1)
+	if (int(i/Npc)==int(j/Npc)) { p=pconPPwc } else { p=pconPPbc }
+	ConPCPC.x[i][j]=-100
+	if (p>q) {
+	   wgt=randn.normal(wPPavg,wPPstd^2)
+	   if (wgt<0) wgt=0
+	   IBnet[i].soma PCPCconA[i][j]=new NetCon(&v(.5),IBasyn[j],thPC,delPC,wgt)
+	   IBnet[i].soma PCPCconN[i][j]=new NetCon(&v(.5),IBnsyn[j],thPC,delPC,wgt)
+	   ConPCPC.x[i][j]=wgt
+	   }
+    }
+}
+
+// IN->IN connections
+
+objref ININconG[Nin*Ncol][Nin*Ncol]
+objref ConININ
+ConININ = new Matrix(Nin*Ncol,Nin*Ncol)
+for i=0,Nin*Ncol-1 {
+    for j=0,Nin*Ncol-1 {
+	q=randn.uniform(0,1)
+	if (int(i/Nin)==int(j/Nin)) { p=pconIIwc } else { p=pconIIbc }
+	ConININ.x[i][j]=-100
+	if (p>q) {
+	   wgt=randn.normal(wIIavg,wIIstd^2)
+	   if (wgt<0) wgt=0
+	   INnet[i].soma ININconG[i][j]=new NetCon(&v(.5),INgsyn[j],thIN,delIN,wgt)
+	   ConININ.x[i][j]=wgt
+	   }
+    }
+}
+
+// PC->IN connections
+
+objref PCINconA[Npc*Ncol][Nin*Ncol]
+objref PCINconN[Npc*Ncol][Nin*Ncol]
+objref ConPCIN
+ConPCIN = new Matrix(Npc*Ncol,Nin*Ncol)
+for i=0,Npc*Ncol-1 {
+    for j=0,Nin*Ncol-1 {
+	q=randn.uniform(0,1)
+	if (int(i/Npc)==int(j/Nin)) { p=pconPIwc } else { p=pconPIbc }
+	ConPCIN.x[i][j]=-100
+	if (p>q) {
+	   wgt=randn.normal(wPIavg,wPIstd^2)
+	   if (wgt<0) wgt=0
+	   IBnet[i].soma PCINconA[i][j]=new NetCon(&v(.5),INasyn[j],thPC,delPC,wgt)
+	   IBnet[i].soma PCINconN[i][j]=new NetCon(&v(.5),INnsyn[j],thPC,delPC,wgt)
+	   ConPCIN.x[i][j]=wgt
+	   }
+    }
+}
+
+// IN->PC connections
+
+objref INPCconG0[Nin*Ncol][Npc*Ncol]
+objref INPCconG1[Nin*Ncol][Npc*Ncol]
+objref ConINPC
+ConINPC = new Matrix(Nin*Ncol,Npc*Ncol)
+for i=0,Nin*Ncol-1 {
+    for j=0,Npc*Ncol-1 {
+	q=randn.uniform(0,1)
+	if (int(i/Nin)==int(j/Npc)) { p=pconIPwc } else { p=pconIPbc }
+	ConINPC.x[i][j]=-100
+	if (p>q) {
+	   wgt=randn.normal(wIPavg,wIPstd^2)
+	   if (wgt<0) wgt=0
+	   INnet[i].soma INPCconG0[i][j]=new NetCon(&v(.5),IBg0syn[j],thIN,delIN,wgt)
+	   INnet[i].soma INPCconG1[i][j]=new NetCon(&v(.5),IBg1syn[j],thIN,delIN,wgt)
+	   ConINPC.x[i][j]=wgt
+	   }
+    }
+}
+
+
+objref fpPar
+fpPar=new File()
+func StoreNetPar() {
+     strdef fnp
+     sprint(fnp,"out/NetPar%d.par",$1)
+     fpPar.wopen(fnp)
+     for (i=0;i<Npc*Ncol;i=i+1) {
+	  fpPar.printf("%d %10.6lf %10.6lf %10.8lf %10.8lf %10.8lf %10.8lf\n",i,IBnet[i].soma.L,IBnet[i].soma.diam,IBnet[i].soma.gNapbar_NapDA,IBnet[i].soma.gKsbar_Ks,IBnet[i].soma.gHVAbar_HVA,IBnet[i].soma.gKcbar_Kc)
+	  fpPar.printf("%d %10.6lf %10.6lf %10.8lf %10.8lf %10.8lf %10.8lf %10.8lf\n",i,IBnet[i].dend.L,IBnet[i].dend.diam,IBnet[i].dend.gNMDAcbar_nmdac,IBnet[i].dend.gNapbar_NapDA,IBnet[i].dend.gKsbar_Ks,IBnet[i].dend.gHVAbar_HVA,IBnet[i].dend.gKcbar_Kc)
+	  }
+     fpPar.printf("\n")
+     for i=0,Nin*Ncol-1 {
+	  fpPar.printf("%d %10.6lf %10.6lf %10.8lf\n",i,INnet[i].soma.L,INnet[i].soma.diam,INnet[i].soma.gNMDAcbar_nmdac)
+	  }
+     fpPar.printf("\n")
+     for i=0,Npc*Ncol-1 {
+	 for j=0,Npc*Ncol-1 {
+	     fpPar.printf("PC%d PC%d %f\n",i,j,ConPCPC.x[i][j])
+	     } }
+     fpPar.printf("\n")
+     for i=0,Nin*Ncol-1 {
+	 for j=0,Nin*Ncol-1 {
+	     fpPar.printf("IN%d IN%d %f\n",i,j,ConININ.x[i][j])
+	     } }
+     fpPar.printf("\n")
+     for i=0,Npc*Ncol-1 {
+	 for j=0,Nin*Ncol-1 {
+	     fpPar.printf("PC%d IN%d %f\n",i,j,ConPCIN.x[i][j])
+	     } }
+     fpPar.printf("\n")
+     for i=0,Nin*Ncol-1 {
+	 for j=0,Npc*Ncol-1 {
+	     fpPar.printf("IN%d PC%d %f\n",i,j,ConINPC.x[i][j])
+	     } }
+     fpPar.close()
+     return i
+}

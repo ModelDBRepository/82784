@@ -1,0 +1,151 @@
+// *********************************************************************
+// Simulation code from Durstewitz & Gabriel (2006), "Dynamical basis of 
+// irregular spiking in NMDA-driven prefrontal cortex neurons", Cerebral
+// Cortex
+// *********************************************************************
+//
+// (c) 2006 Daniel Durstewitz
+
+Ncol=1
+
+// avg & std of constant NMDA, gHVA, gC
+gNMDAc_avgPC=AvgNMDA
+gNMDAc_stdPC=0.2*gNMDAc_avgPC
+gNMDAc_avgIN=AvgNMDA
+gNMDAc_stdIN=0.2*gNMDAc_avgIN
+gHVAstd=0.2
+gCstd=0.2
+gNapstd=0.2
+gKsstd=0.2
+MorphStd=0.2
+
+// connection probs. within & between columns
+pconPPwc=0.2
+pconPPbc=0.0
+pconIIwc=0.2
+pconIIbc=0.0
+pconPIwc=0.2
+pconPIbc=0.0
+pconIPwc=0.2
+pconIPbc=0.0
+
+// max. syn. conductances
+gAMPAmaxPC=gexc*0.1*100/Npc
+gNMDAmaxPC=gAMPAmaxPC/50
+gGABAmaxPC=ginh*0.1*25/Nin
+gAMPAmaxIN=gexc*0.1*100/Npc
+gNMDAmaxIN=gAMPAmaxIN/50
+gGABAmaxIN=ginh*0.1*25/Nin
+
+// synaptic weights
+wPPavg=1.0
+wPPstd=0.5
+wIIavg=1.0
+wIIstd=0.5
+wPIavg=1.0
+wPIstd=0.5
+wIPavg=1.0
+wIPstd=0.5
+
+// syn. short-term depr./fac.
+PCPCtauD=800
+PCPCtauF=800
+PCPCutil=0.3
+INPCtauD=600
+INPCtauF=1000
+INPCutil=0.25
+ININtauD=600
+ININtauF=1200
+ININutil=0.12
+PCINtauD=150
+PCINtauF=1200
+PCINutil=0.05
+
+thPC=-20
+thIN=-20
+delPC=3
+delIN=3
+
+xopen("IB_DA.tem")
+xopen("IN_DA.tem")
+xopen("CNetZ_DA.hoc")
+
+objref stim[Npc*Ncol]
+for i=0,Npc*Ncol-1 {
+    IBnet[i].soma stim[i]=new IClamp(.5)
+    stim[i].del=1e9
+    stim[i].dur=1e9
+    stim[i].amp=0.0
+}
+
+
+load_file("stdrun.hoc")
+
+objref cv
+cv=new CVode(1)
+//cv.rtol(1e-8)
+cv.rtol(1e-4)
+cv.atol(1e-10)
+cv.active(1)
+cv.use_local_dt(1)
+
+tstop=2.0e5
+dt=0.5
+v_init=-65
+PCsv=1*int(Npc/100)
+INsv=5*int(Nin/25)
+
+
+
+t=0
+finitialize(v_init)
+fcurrent()
+cv.re_init()
+
+objref fp
+fp=new File()
+n=int(tstop/dt)
+
+objref PCv[Npc*Ncol]
+objref PCt[Npc*Ncol]
+
+for (i=0;i<Npc*Ncol;i=i+PCsv) {
+    PCv[i]=new Vector()
+    PCt[i]=new Vector(n)
+    for j=0,n-1 { PCt[i].x[j]=j*dt }
+    IBnet[i].soma cv.record(&v(.5),PCv[i],PCt[i],1)
+}
+
+objref INv[Nin*Ncol]
+objref INt[Nin*Ncol]
+
+for (i=0;i<Nin*Ncol;i=i+INsv) {
+    INv[i]=new Vector()
+    INt[i]=new Vector(n)
+    for j=0,n-1 { INt[i].x[j]=j*dt }
+    INnet[i].soma cv.record(&v(.5),INv[i],INt[i],1)
+}
+
+run()
+
+
+func write_to_file() {
+     strdef fn
+     for (i=0;i<Npc*Ncol;i=i+PCsv) {
+	 sprint(fn,"out/PC%d_%d.dat",$1,i)
+	 fp.wopen(fn)
+	 for j=0,PCt[i].size()-1 {
+	     fp.printf("%f %f\n",PCt[i].x[j],PCv[i].x[j])
+	     }
+	 fp.close()
+	 }
+     for (i=0;i<Nin*Ncol;i=i+INsv) {
+	 sprint(fn,"out/IN%d_%d.dat",$1,i)
+	 fp.wopen(fn)
+	 for j=0,INt[i].size()-1 {
+	     fp.printf("%f %f\n",INt[i].x[j],INv[i].x[j])
+	     }
+	 fp.close()
+	 }
+     return i
+}
