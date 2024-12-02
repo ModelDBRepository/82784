@@ -54,3 +54,7 @@ start the simulation.
 In unix, ms win compile the mod file using mknrndll, then start the
 simulation by running nrngui mosinit.hoc (unix) or double clicking on
 the mosinit.hoc file (ms win).
+
+Changelog
+---------
+2024-11: Updated hoc files to use Random123

@@ -11,6 +11,7 @@ objref INnet[Nin*Ncol]
 
 objref randn
 randn=new Random(1)
+randn.Random123()
 
 for i=0,Npc*Ncol-1 {
     IBnet[i]=new IBcell()
